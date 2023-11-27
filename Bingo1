@@ -1,0 +1,445 @@
+import java.util.*;
+
+public class TesteBingo19 {
+
+    public static void main(String[] args) {
+
+        Scanner entradas = new Scanner(System.in);
+        int escolhaJogo;
+        boolean continuarJogo = true;
+
+        System.out.println("*************************************************************************************");
+        System.out.println("*************************************************************************************");
+        System.out.println();
+        System.out.println();
+
+        System.out.println(  "                        Bem-vindo ao Bingo dos 50 mais!                            ");
+
+        System.out.println();
+        System.out.println();
+        System.out.println("*************************************************************************************");
+        System.out.println("*************************************************************************************");
+
+
+        System.out.println("Olá escolha o tipo de jogo que você quer, Random ou Manual!");
+        System.out.println("Para Random digite: 1");
+        System.out.println("Para Manual digite: 2");
+        System.out.println("> ");
+
+        while (true) {
+            if (entradas.hasNextInt()) {
+                escolhaJogo = entradas.nextInt();
+
+                if (escolhaJogo == 1 || escolhaJogo == 2) {
+                    break;
+                } else {
+                    System.out.println("Por favor, digite 1 para Random ou 2 para Manual. Tente novamente.");
+                    System.out.print("> ");
+                }
+            } else {
+                entradas.next();
+                System.out.println("Por favor, digite um número válido (1 para Random ou 2 para Manual). Tente novamente.");
+                System.out.print("> ");
+            }
+        }
+
+
+        System.out.println("Digite o nome dos participante serpados por hifen: player1-player2-player3");
+        System.out.println("> ");
+        Scanner input = new Scanner(System.in);
+        String nomes;
+
+        while (true) {
+            nomes = input.nextLine();
+
+            if (nomes.matches("^[a-zA-Z0-9]+(-[a-zA-Z0-9]+)*$")) {
+                break;
+            } else {
+                System.out.println("Formato inválido. Digite os nomes separados por hífen. Ex: player1-player2-player3");
+                System.out.print("> ");
+            }
+        }
+
+
+        int tamanhoDaCartela = 5;
+        int[] numerosAletorios = new int[60];
+        String[] jogadores = nomes.split("-");
+        int numerosDeCartelas = jogadores.length;
+        int[][] cartelas = new int[numerosDeCartelas][tamanhoDaCartela];
+
+        if (escolhaJogo == 1) {
+            jogadorRandom(numerosDeCartelas, tamanhoDaCartela, cartelas);
+        } else if (escolhaJogo == 2) {
+            jogadorManual(jogadores, cartelas);
+        }
+
+
+
+        jogadorRandom(numerosDeCartelas, tamanhoDaCartela, cartelas);
+
+
+        Random random = new Random();
+
+
+        int[] sorteados = new int[tamanhoDaCartela];
+        int[][] pontosDoJogadores = new int[numerosDeCartelas][tamanhoDaCartela];
+        int[][] acertos = new int[numerosDeCartelas][1];
+        int [] cincoSoteados = new int[tamanhoDaCartela];
+        int rounds = 0;
+        int quantidadeNumeros = 60;
+
+        int fim = 0;
+
+        int numeros = 60;
+        int sorteado = 0;
+
+
+
+        imprimirCartelas(jogadores, cartelas);
+        Set<Integer> numerosSorteados = new HashSet<>();
+
+        System.out.println(" \nVocê deseja prosseguir, digite 5 para continuar ou 9 para encerrar o jogo.");
+        System.out.println(">");
+        int encerraJogo = 0;
+        cotinuaOJogoOUNao(encerraJogo);
+
+
+        while (fim != 60) {
+            int contaCinco = 0;
+
+            while (contaCinco < 5) {
+
+                do {
+                    sorteado = random.nextInt(numeros) + 1;
+                } while (numerosSorteados.contains(sorteado));
+
+                numerosSorteados.add(sorteado);
+
+
+                System.out.println("\nNumero sorteado: " + sorteado);
+                cincoSoteados[contaCinco] = sorteado;
+
+                numerosAletorios[fim] = sorteado;
+
+
+                // verifica onde o numero sorteados esta na Matriz cartelas e marca a posição equivalente na
+                // Matrix pontosDoJogador com 1.
+                for (int i = 0; i < cartelas.length; i++) {
+                    for (int j = 0; j < cartelas[i].length; j++) {
+                        if (sorteado == cartelas[i][j]) {
+                            pontosDoJogadores[i][j] = 1;
+                        }
+                    }
+                } contaCinco++;
+
+            }
+            Arrays.sort(cincoSoteados);
+            System.out.println(Arrays.toString(cincoSoteados));
+
+
+            primeiroVerifica(pontosDoJogadores, acertos, jogadores, cartelas);
+            boolean verificouGanhador = verificarGanhador(pontosDoJogadores, jogadores,cartelas);
+            if (verificouGanhador == true) {
+                break;
+            }
+
+
+            System.out.println(" \nVocê deseja prosseguir, digite 5 para continuar ou 9 para encerrar o jogo.");
+            System.out.println(">");
+            cotinuaOJogoOUNao(encerraJogo);
+
+            fim++;
+
+
+
+        }
+        System.out.println("\n*************************************");
+        System.out.println("* Nosso BINGO teve: " + (fim + 1) + " rodadas      *");
+        System.out.println("*************************************");
+
+
+        int[] aletorisSemZero = new int[fim + 1];
+
+        for (int i = 0; i < aletorisSemZero.length; i++) {
+            aletorisSemZero[i] = numerosAletorios[i];
+            }
+
+        Arrays.sort(aletorisSemZero);
+        System.out.println("\nOs numeros sorteados em ordem crescente foram:");
+        System.out.println(Arrays.toString(aletorisSemZero));
+
+        int posicao2 = 5; int contador3 = 0;
+        finalDeJogo(pontosDoJogadores,jogadores,cartelas,posicao2,contador3);
+
+    }
+
+    private static void jogadorManual(String[] jogadores, int[][] cartelas) {
+        Scanner input2 = new Scanner(System.in);
+
+
+        System.out.println("Digite as cartelas a entrada devera ser: '1,2,3,4,5-6,7,8,9,1-2,3,4,5,6' ");
+        //String cartelasInput = input2.nextLine();
+
+        String cartelasInput = input2.nextLine();
+        String[] tiraTraco = cartelasInput.split("-");
+
+        // int[][] cartelas = new int[jogadores.length][5];
+
+        for (int i = 0; i < jogadores.length; i++) {
+
+            String[] tiraVigula = tiraTraco[i].toString().split(",");
+            int[] inteiros = new int[5];
+            for (int k = 0; k < 5; k++) {
+                inteiros[k] = Integer.parseInt(tiraVigula[k]);
+            }
+            cartelas[i] = inteiros;
+        }
+
+
+    }
+
+    private static void jogadorRandom(int numerosDeCartelas, int tamanhoDaCartela, int[][] cartelas) {
+        Random random = new Random();
+
+        for (int i = 0; i < numerosDeCartelas; i++) {
+
+            int[] cartela = criarCartela(tamanhoDaCartela, random);
+
+            cartelas[i] = cartela;
+
+        }
+
+    }
+
+    // Criar Cartela.
+    private static int[] criarCartela(int tamanhoDaCartela, Random random) {
+        int[] cartela = new int[tamanhoDaCartela];
+
+        for (int j = 0; j < tamanhoDaCartela; j++) {
+            int numero;
+            do {
+                numero = random.nextInt(60) + 1;
+            } while (contemNumero(cartela, numero));
+
+            cartela[j] = numero;
+        }
+
+        Arrays.sort(cartela);
+        return cartela;
+    }
+
+    // Método para Imprimir Cartelas:
+    private static void imprimirCartelas(String[] jogadores, int[][] cartelas) {
+        for (int i = 0; i < cartelas.length; i++) {
+            System.out.print(jogadores[i] + " :");
+            for (int j = 0; j < cartelas[0].length; j++) {
+                System.out.print(" " + cartelas[i][j]);
+            }
+            System.out.println(" ");
+        }
+    }
+
+    // Verifica se um número já está presente no cartela.
+    private static boolean contemNumero(int[] cartela, int numero) {
+        for (int i : cartela) {
+            if (i == numero) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static void primeiroVerifica(int[][] pontosDoJogadores, int[][] acertos, String[] jogadores, int[][] cartelas) {
+        // Verifica quem esta em primeiro lugar.
+        int[][] contador = new int[1][5];
+        for (int i = 0; i < pontosDoJogadores.length; i++) {
+            acertos[i][0] = pontosDoJogadores[i][0] + pontosDoJogadores[i][1] + pontosDoJogadores[i][2] +
+                    pontosDoJogadores[i][3] + pontosDoJogadores[i][4];
+        }
+
+        for (int i = 0; i < acertos.length; i++) {
+
+            if (acertos[i][0] == 5) {
+                contador[0][4] = 5;
+            }
+            if (acertos[i][0] == 4) {
+                contador[0][3] = 4;
+            }
+            if (acertos[i][0] == 3) {
+                contador[0][2] = 3;
+            }
+            if (acertos[i][0] == 2) {
+                contador[0][1] = 2;
+            }
+            if (acertos[i][0] == 1) {
+                contador[0][0] = 1;
+            }
+        }
+
+        primerioLugar(pontosDoJogadores, jogadores, cartelas, contador);
+    }
+
+    private static void primerioLugar(int[][] pontosDoJogadores, String[] jogadores, int[][] cartelas, int[][] contador) {
+        int primeiroLugar;
+        int segundoLugar = 0;
+        int terceiroLugar = 0;
+        int contador2 = 0;
+
+
+        if (contador[0][4] == 5) {
+            primeiroLugar = 5;
+        } else if (contador[0][3] == 4) {
+            primeiroLugar = 4;
+        } else if (contador[0][2] == 3) {
+            primeiroLugar = 3;
+        } else if (contador[0][1] == 2) {
+            primeiroLugar = 2;
+        } else if (contador[0][0] == 1) {
+            primeiroLugar = 1;
+        } else {
+            // Ninguém fez pontos
+            return;
+        }
+
+
+        segundoLugar = primeiroLugar - 1;
+
+        if (contador[0][3] == segundoLugar) {
+            segundoLugar = 4;
+        } else if (contador[0][2] == segundoLugar) {
+            segundoLugar = 3;
+        } else if (contador[0][1] == segundoLugar) {
+            segundoLugar = 2;
+        } else if (contador[0][0] == segundoLugar) {
+            segundoLugar = 1;
+        } else {
+            // Ninguém fez pontos
+            return;
+        }
+
+        terceiroLugar = segundoLugar - 1;
+
+        if (contador[0][2] == terceiroLugar) {
+            terceiroLugar = 3;
+        } else if (contador[0][1] == terceiroLugar) {
+            terceiroLugar = 2;
+        } else if (contador[0][0] == terceiroLugar) {
+            terceiroLugar = 1;
+        } else {
+            // Ninguém fez pontos
+            return;
+        }
+
+
+        System.out.println("\nPrimeiro Lugar");
+        System.out.printf("\n%-15s %-15s %-18s%n", "Nome", "Cartela", "Pontos");
+        imprimirPosicao(pontosDoJogadores, jogadores, cartelas, primeiroLugar);
+
+        if(segundoLugar >= 1){
+
+        System.out.println("\nSegundo Lugar");
+        System.out.printf("\n%-15s %-15s %-18s%n", "Nome", "Cartela", "Pontos");
+        imprimirPosicao(pontosDoJogadores, jogadores, cartelas, segundoLugar);
+        }
+
+        if(terceiroLugar >= 1){
+        System.out.println("\nTerceiro Lugar");
+        System.out.printf("\n%-15s %-15s %-18s%n", "Nome", "Cartela", "Pontos");
+        imprimirPosicao(pontosDoJogadores, jogadores, cartelas, terceiroLugar);
+        } else {
+
+        }
+    }
+
+    private static void imprimirPosicao(int[][] pontosDoJogadores, String[] jogadores, int[][] cartelas, int posicao) {
+
+// ***********
+        //System.out.printf("%-15s %-15s %-15s%n", "Nome", "Cartela", "Pontos");
+        for (int i = 0; i < pontosDoJogadores.length; i++) {
+            int contador2 = 0;
+            for (int j = 0; j < pontosDoJogadores[i].length; j++) {
+                if (pontosDoJogadores[i][j] == 1) {
+                    contador2++;
+                }
+            }
+            if (contador2 == posicao) {
+                //System.out.printf("%-10s %-15s %-18s%n", "Nome", "Cartela", "Pontos");
+                System.out.printf("\n%-10s %-15s %-18s%n", jogadores[i], Arrays.toString(cartelas[i]),
+                        Arrays.toString(pontosDoJogadores[i]));
+                System.out.printf(" ");
+            }
+        }
+    }
+
+    private static boolean verificarGanhador(int[][] pontosDoJogadores, String[] jogadores, int [][]cartelas) {
+        for (int i = 0; i < pontosDoJogadores.length; i++) {
+            int contador = 0;
+            for (int j = 0; j < pontosDoJogadores[i].length; j++) {
+                if (pontosDoJogadores[i][j] == 1) {
+                    contador++;
+                    if (contador == 5) {
+                        System.out.printf("\n%-15s", "Temos um Ganhador!");
+                        System.out.println("\n************************************************");
+                        System.out.printf("* %-15s %-15s %-20s%n", "Nome", "Cartela", "Pontos");
+                        System.out.printf("\n%-10s %-15s %-18s%n", jogadores[i], Arrays.toString(cartelas[i]),
+                                Arrays.toString(pontosDoJogadores[i]));
+                        System.out.println("************************************************");
+
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    private static void cotinuaOJogoOUNao(int encerraJogo) {
+        Scanner entradas = new Scanner(System.in);
+        while (true) {
+            if (entradas.hasNextInt()) {
+                encerraJogo = entradas.nextInt();
+
+                if (encerraJogo == 5 || encerraJogo == 9) {
+                    break;
+                } else {
+                    System.out.println(" \nVocê deseja prosseguir, digite 5 para continuar ou 9 para encerrar o jogo.");
+                    System.out.print("> ");
+                }
+            } else {
+                entradas.next();
+                System.out.println("Por favor, digite um número válido, digite 5 para continuar ou 9 para encerrar o jogo. Tente novamente.");
+                System.out.print("> ");
+            }
+        } if (encerraJogo == 5) {
+
+        } else if (encerraJogo == 9) {
+            System.out.println("Jogo encerrado");
+            System.exit(0);
+        }
+
+    }
+    private  static void finalDeJogo(int[][] pontosDoJogadores, String[] jogadores, int[][] cartelas, int posicao,int contador3){
+        int a = 0;
+        while (a < 5) {
+
+            for (int i = 0; i < pontosDoJogadores.length; i++) {
+                int contador2 = 0;
+
+                for (int j = 0; j < pontosDoJogadores[i].length; j++) {
+                    if (pontosDoJogadores[i][j] == 1) {
+                        contador2++;
+                    }
+                }
+                if (contador2 == posicao) {
+                    contador3++;
+                    System.out.printf("\n%-1s• %-10s %-15s %-18s%n", contador3,  jogadores[i],
+                            Arrays.toString(cartelas[i]),
+                            Arrays.toString(pontosDoJogadores[i]));
+
+                }
+            } posicao = posicao - 1;
+            a++;
+
+        }
+    }
+}
